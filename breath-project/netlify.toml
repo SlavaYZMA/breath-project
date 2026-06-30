@@ -1,0 +1,54 @@
+[[redirects]]
+  from = "/api/record"
+  to = "/.netlify/functions/record"
+  status = 200
+
+[[redirects]]
+  from = "/api/publish"
+  to = "/.netlify/functions/publish"
+  status = 200
+
+[[redirects]]
+  from = "/api/delete"
+  to = "/.netlify/functions/delete"
+  status = 200
+
+[[redirects]]
+  from = "/api/status"
+  to = "/.netlify/functions/status"
+  status = 200
+
+[[redirects]]
+  from = "/api/archive"
+  to = "/.netlify/functions/archive"
+  status = 200
+
+[[redirects]]
+  from = "/api/audio/:id"
+  to = "/.netlify/functions/audio"
+  status = 200
+
+[[redirects]]
+  from = "/api/report/:id"
+  to = "/.netlify/functions/report"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/queue"
+  to = "/.netlify/functions/admin-queue"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/audio/:id"
+  to = "/.netlify/functions/admin-audio"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/approve/:id"
+  to = "/.netlify/functions/admin-approve"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/reject/:id"
+  to = "/.netlify/functions/admin-reject"
+  status = 200

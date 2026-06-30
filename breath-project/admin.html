@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ДЫХАНИЕ — модерация</title>
+<style>
+  body{background:#0c0c0d;color:#edeae3;font-family:ui-monospace,monospace;padding:3rem 4vw;}
+  h1{font-weight:400;font-size:1.4rem;}
+  .stats{display:flex;gap:1.6rem;flex-wrap:wrap;color:#6b6862;font-size:0.82rem;margin-bottom:2rem;}
+  .stats b{color:#edeae3;font-weight:400;}
+  .row{border:1px solid #232220;padding:1rem;margin-bottom:0.8rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;}
+  audio{height:32px;}
+  button{background:none;border:1px solid #edeae3;color:#edeae3;padding:0.4rem 0.9rem;cursor:pointer;font-family:inherit;font-size:0.78rem;}
+  button:hover{border-color:#7c8b99;color:#7c8b99;}
+  .reject{border-color:#b0635f;}
+  .reject:hover{color:#b0635f;border-color:#b0635f;}
+  #loginBox{max-width:360px;}
+  input{width:100%;background:#000;border:1px solid #232220;color:#edeae3;padding:0.6rem;font-family:inherit;margin-bottom:0.8rem;}
+  .empty{color:#6b6862;}
+  .flag{color:#c79a6b;font-size:0.74rem;}
+</style>
+</head>
+<body>
+<h1>Очередь модерации</h1>
+<div id="loginBox">
+  <p>Пароль администратора:</p>
+  <input type="password" id="pw">
+  <button onclick="login()">Войти</button>
+</div>
+<div id="panel" style="display:none;">
+  <div class="stats" id="stats"></div>
+  <div id="list"></div>
+</div>
+<script>
+var pw=null;
+function login(){pw=document.getElementById('pw').value;refresh();}
+function authHeaders(){return{'X-Admin-Password':pw};}
+function refresh(){
+  fetch('/api/admin/queue',{headers:authHeaders()}).then(function(r){
+    if(r.status===401){alert('Неверный пароль');return null;}
+    document.getElementById('loginBox').style.display='none';
+    document.getElementById('panel').style.display='block';
+    return r.json();
+  }).then(function(d){
+    if(!d) return;
+    var s=d.stats;
+    document.getElementById('stats').innerHTML=
+      '<span>всего: <b>'+s.total+'</b></span><span>опубликовано: <b>'+s.active+'</b></span>'+
+      '<span>удалено: <b>'+s.deleted+'</b></span><span>черновики: <b>'+s.draft+'</b></span>'+
+      '<span>на проверке: <b>'+s.pending+'</b></span><span>отклонено: <b>'+s.rejected+'</b></span>';
+    var list=document.getElementById('list');
+    if(!d.pending.length){list.innerHTML='<p class="empty">Очередь пуста.</p>';return;}
+    list.innerHTML=d.pending.map(function(p){
+      return '<div class="row">'+
+        '<span>#'+p.id+'</span>'+
+        '<audio controls data-id="'+p.id+'"></audio>'+
+        '<span>'+(p.duration?Number(p.duration).toFixed(1)+'s':'')+'</span>'+
+        (p.flaggedSpeechLike?'<span class="flag">похоже на речь</span>':'<span class="flag">по жалобе</span>')+
+        '<button onclick="approve('+p.id+')">Опубликовать</button>'+
+        '<button class="reject" onclick="reject('+p.id+')">Отклонить</button>'+
+      '</div>';
+    }).join('');
+    list.querySelectorAll('audio').forEach(function(a){
+      var id=a.dataset.id;
+      fetch('/api/admin/audio/'+id,{headers:authHeaders()}).then(function(r){
+        // admin-audio редиректит на signed URL — следуем редиректу
+        return r.url?fetch(r.url):r;
+      }).then(function(r){return r.blob();}).then(function(b){a.src=URL.createObjectURL(b);});
+    });
+  });
+}
+function approve(id){fetch('/api/admin/approve/'+id,{method:'POST',headers:authHeaders()}).then(refresh);}
+function reject(id){if(confirm('Отклонить и удалить запись #'+id+'?')) fetch('/api/admin/reject/'+id,{method:'POST',headers:authHeaders()}).then(refresh);}
+</script>
+</body>
+</html>

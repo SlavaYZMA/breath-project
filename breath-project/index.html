@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ДЫХАНИЕ — архив присутствия и согласия</title>
+<style>
+  :root{
+    --bg:#0c0c0d;--fg:#edeae3;--muted:#6b6862;--accent:#7c8b99;--absent:#3a3835;--line:#232220;
+    --serif:'Fraunces',Georgia,serif;--sans:'IBM Plex Sans',-apple-system,system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400&family=Noto+Sans+Arabic:wght@400;500&family=Noto+Sans+SC:wght@400;500&family=Noto+Sans+Devanagari:wght@400;500&display=swap');
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:var(--sans);}
+  body{min-height:100vh;}
+  body[dir="rtl"]{font-family:'Noto Sans Arabic',var(--sans);}
+  body.lang-zh{font-family:'Noto Sans SC',var(--sans);}
+  body.lang-hi{font-family:'Noto Sans Devanagari',var(--sans);}
+  ::selection{background:var(--accent);color:var(--bg);}
+  a{color:inherit;}button{font-family:inherit;}
+  header{padding:6vh 6vw 3vh;display:flex;flex-direction:column;gap:1.2rem;border-bottom:1px solid var(--line);}
+  h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.6rem,7vw,5rem);letter-spacing:0.03em;margin:0;line-height:0.95;}
+  header p{margin:0;max-width:46ch;color:var(--muted);font-size:0.95rem;line-height:1.6;font-weight:300;}
+  .headerRow{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;flex-wrap:wrap;}
+  nav{display:flex;gap:1.6rem;font-size:0.78rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}
+  nav button{background:none;border:none;color:inherit;cursor:pointer;padding:0;font-size:inherit;letter-spacing:inherit;text-transform:inherit;}
+  nav button:hover{color:var(--fg);}
+  .langRow{display:flex;gap:6px;flex-wrap:wrap;margin-top:0.4rem;}
+  .langBtn{background:none;border:1px solid var(--line);color:var(--muted);cursor:pointer;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.04em;padding:0.28rem 0.55rem;border-radius:2px;text-transform:uppercase;}
+  .langBtn:hover{border-color:var(--accent);color:var(--fg);}
+  .langBtn.active{background:var(--fg);color:var(--bg);border-color:var(--fg);}
+  .recordBtn{background:var(--fg);color:var(--bg);border:none;border-radius:2px;padding:0.85rem 1.6rem;font-size:0.85rem;letter-spacing:0.05em;cursor:pointer;text-transform:uppercase;font-weight:500;}
+  .recordBtn:hover{background:var(--accent);color:var(--bg);}
+  main{padding:6vh 6vw 10vh;}
+  .archiveMeta{display:flex;gap:2.5rem;margin-bottom:4vh;font-family:var(--mono);font-size:0.78rem;color:var(--muted);flex-wrap:wrap;}
+  .archiveMeta b{color:var(--fg);font-weight:400;}
+  .grid{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;min-height:240px;padding-bottom:2px;border-bottom:1px solid var(--line);}
+  .slot{position:relative;width:14px;height:220px;display:flex;align-items:flex-end;justify-content:center;cursor:pointer;}
+  .slot .bar{width:2px;background:var(--muted);border-radius:1px;transition:height .4s ease,background .3s ease,opacity .3s ease;}
+  .slot.deleted .bar{background:var(--absent);height:18px !important;opacity:0.7;}
+  .slot.deleted::after{content:'';position:absolute;bottom:14px;width:8px;height:1px;background:var(--absent);}
+  .slot:not(.deleted):hover .bar,.slot.playing .bar{background:var(--fg);}
+  .slot:not(.deleted):hover::before,.slot.playing::before{content:'';position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--accent);}
+  .slot .tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);font-family:var(--mono);font-size:0.68rem;padding:0.3rem 0.5rem;white-space:nowrap;border-radius:2px;opacity:0;pointer-events:none;transition:opacity .15s;}
+  .slot:hover .tip{opacity:0.9;}
+  .reportBtn{position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:none;border:none;color:var(--muted);font-size:0.62rem;cursor:pointer;opacity:0;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;}
+  .slot:hover .reportBtn{opacity:0.6;}
+  .reportBtn:hover{opacity:1 !important;color:var(--fg);}
+  .emptyNote{color:var(--muted);font-size:0.9rem;padding:3rem 0;max-width:42ch;line-height:1.6;}
+  footer{padding:4vh 6vw 6vh;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:var(--muted);font-size:0.75rem;flex-wrap:wrap;gap:1rem;}
+  footer nav{margin:0;}
+  .overlay{position:fixed;inset:0;background:rgba(12,12,13,0.92);display:none;align-items:center;justify-content:center;padding:5vw;z-index:50;overflow-y:auto;}
+  .overlay.open{display:flex;}
+  .modal{background:#141414;border:1px solid var(--line);max-width:560px;width:100%;padding:2.4rem;border-radius:2px;max-height:86vh;overflow-y:auto;position:relative;}
+  .modal h2{font-family:var(--serif);font-weight:300;font-size:1.6rem;margin:0 0 1rem;}
+  .modal h3{font-size:0.92rem;margin:1.4rem 0 0.4rem;color:var(--fg);font-weight:500;}
+  .modal p{color:var(--muted);font-size:0.88rem;line-height:1.65;margin:0 0 1rem;}
+  .modal label{display:flex;gap:0.6rem;align-items:flex-start;font-size:0.82rem;color:var(--fg);margin-bottom:1.4rem;cursor:pointer;}
+  .modal input[type=checkbox]{margin-top:3px;}
+  .modalActions{display:flex;gap:0.8rem;margin-top:1.6rem;flex-wrap:wrap;}
+  .btn{border:1px solid var(--fg);background:none;color:var(--fg);padding:0.7rem 1.3rem;font-size:0.82rem;cursor:pointer;border-radius:2px;letter-spacing:0.02em;}
+  .btn.primary{background:var(--fg);color:var(--bg);}
+  .btn.primary:hover{background:var(--accent);border-color:var(--accent);}
+  .btn:hover{border-color:var(--accent);color:var(--accent);}
+  .btn:disabled{opacity:0.4;cursor:default;}
+  .closeX{position:absolute;top:1.2rem;inset-inline-end:1.4rem;background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;}
+  .recIndicator{width:100%;height:160px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;border:1px dashed var(--line);margin-bottom:1.2rem;border-radius:2px;}
+  .recDot{width:14px;height:14px;border-radius:50%;background:var(--muted);transition:background .2s;}
+  .recDot.live{background:#b0635f;animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+  .recTime{font-family:var(--mono);color:var(--fg);font-size:1.4rem;}
+  .recHint{font-family:var(--mono);color:var(--muted);font-size:0.72rem;}
+  .tokenBox{font-family:var(--mono);background:#000;border:1px solid var(--line);padding:1rem;word-break:break-all;font-size:0.95rem;color:var(--fg);border-radius:2px;margin-bottom:0.8rem;}
+  .warn{color:#c79a6b;font-size:0.8rem;line-height:1.5;margin-bottom:1.2rem;}
+  input[type=text]{width:100%;background:#000;border:1px solid var(--line);color:var(--fg);padding:0.7rem 0.8rem;font-family:var(--mono);font-size:0.85rem;border-radius:2px;margin-bottom:1rem;}
+  .statusLine{font-family:var(--mono);font-size:0.8rem;color:var(--accent);margin-bottom:1rem;min-height:1.2em;}
+  .impressumRow{display:flex;gap:0.6rem;font-size:0.86rem;margin-bottom:0.5rem;}
+  .impressumRow .k{color:var(--muted);min-width:9ch;}
+  .legalNote{font-size:0.74rem;color:var(--muted);border-top:1px solid var(--line);padding-top:1rem;margin-top:1.4rem;}
+  @media(max-width:640px){header{padding:5vh 6vw 3vh;}main{padding:4vh 6vw 8vh;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="headerRow">
+    <h1>ДЫХАНИЕ</h1>
+    <nav>
+      <button data-i18n="nav.about" onclick="openModal('about')"></button>
+      <button data-i18n="nav.privacy" onclick="openModal('privacy')"></button>
+      <button data-i18n="nav.impressum" onclick="openModal('impressum')"></button>
+      <button data-i18n="nav.manage" onclick="openModal('manage')"></button>
+    </nav>
+  </div>
+  <p data-i18n="intro"></p>
+  <div class="langRow" id="langRow"></div>
+  <div><button class="recordBtn" data-i18n="recordBtn" onclick="openModal('record')"></button></div>
+</header>
+
+<main>
+  <div class="archiveMeta">
+    <span><span data-i18n="meta.active"></span> <b id="metaActive">—</b></span>
+    <span><span data-i18n="meta.deleted"></span> <b id="metaDeleted">—</b></span>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="emptyNote" id="emptyNote" data-i18n="emptyNote" style="display:none;"></div>
+</main>
+
+<footer>
+  <span data-i18n="footerLocation"></span>
+  <nav style="display:flex;gap:1.4rem;">
+    <button data-i18n="nav.about" onclick="openModal('about')" style="background:none;border:none;color:inherit;cursor:pointer;font-size:inherit;"></button>
+    <button data-i18n="nav.privacy" onclick="openModal('privacy')" style="background:none;border:none;color:inherit;cursor:pointer;font-size:inherit;"></button>
+    <button data-i18n="nav.impressum" onclick="openModal('impressum')" style="background:none;border:none;color:inherit;cursor:pointer;font-size:inherit;"></button>
+  </nav>
+</footer>
+
+<!-- RECORD MODAL -->
+<div class="overlay" id="overlay-record">
+  <div class="modal">
+    <button class="closeX" onclick="closeModal('record')">×</button>
+    <div id="recordStepConsent">
+      <h2 data-i18n="consent.title"></h2>
+      <p data-i18n="consent.text"></p>
+      <label><input type="checkbox" id="consentCheck"> <span data-i18n="consent.checkbox"></span></label>
+      <div class="modalActions">
+        <button class="btn primary" data-i18n="consent.continueBtn" onclick="startRecordingFlow()"></button>
+        <button class="btn" data-i18n="consent.cancelBtn" onclick="closeModal('record')"></button>
+      </div>
+    </div>
+    <div id="recordStepRecord" style="display:none;">
+      <h2 data-i18n="record.title"></h2>
+      <p class="recHint" data-i18n="record.hint" style="margin-bottom:1rem;"></p>
+      <div class="recIndicator">
+        <div class="recDot" id="recDot"></div>
+        <div class="recTime" id="recTime">0.0s</div>
+        <div class="recHint" id="recHint" data-i18n="record.hintStart"></div>
+      </div>
+      <div class="modalActions">
+        <button class="btn primary" id="recButton" data-i18n="record.startBtn" onclick="toggleRecording()"></button>
+        <button class="btn" data-i18n="consent.cancelBtn" onclick="closeModal('record')"></button>
+      </div>
+    </div>
+    <div id="recordStepProcessing" style="display:none;">
+      <h2 data-i18n="record.title"></h2>
+      <div class="recIndicator">
+        <div class="recHint" id="processingHint" data-i18n="processing.hint"></div>
+      </div>
+    </div>
+    <div id="recordStepPreview" style="display:none;">
+      <h2 data-i18n="preview.title"></h2>
+      <p><span data-i18n="preview.durationLabel"></span> <span id="previewDuration">—</span></p>
+      <audio id="previewPlayer" controls style="width:100%;margin-bottom:1.2rem;"></audio>
+      <div class="modalActions">
+        <button class="btn primary" id="uploadBtn" data-i18n="preview.uploadBtn" onclick="uploadRecording()"></button>
+        <button class="btn" data-i18n="preview.rerecordBtn" onclick="rerecord()"></button>
+      </div>
+      <div class="statusLine" id="uploadStatus"></div>
+    </div>
+    <div id="recordStepToken" style="display:none;">
+      <h2 data-i18n="token.title"></h2>
+      <p class="warn" data-i18n="token.warning"></p>
+      <div class="tokenBox" id="tokenDisplay"></div>
+      <div class="modalActions">
+        <button class="btn" data-i18n="token.copyBtn" onclick="copyToken()"></button>
+      </div>
+      <p id="pendingNote" data-i18n="token.pendingNote" style="display:none;"></p>
+      <div class="modalActions" style="margin-top:1rem;">
+        <button class="btn primary" id="publishNowBtn" data-i18n="token.publishNowBtn" onclick="publishNow()"></button>
+        <button class="btn" data-i18n="token.closeBtn" onclick="closeModal('record')"></button>
+      </div>
+      <div class="statusLine" id="publishStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE MODAL -->
+<div class="overlay" id="overlay-manage">
+  <div class="modal">
+    <button class="closeX" onclick="closeModal('manage')">×</button>
+    <h2 data-i18n="manage.title"></h2>
+    <p data-i18n="manage.text"></p>
+    <input type="text" id="manageTokenInput" data-i18n-placeholder="manage.placeholder">
+    <div class="modalActions">
+      <button class="btn" data-i18n="manage.checkBtn" onclick="checkToken()"></button>
+    </div>
+    <div class="statusLine" id="manageStatus"></div>
+    <div id="manageActions" style="display:none;margin-top:1rem;" class="modalActions">
+      <button class="btn primary" data-i18n="manage.publishBtn" onclick="managePublish()"></button>
+      <button class="btn" data-i18n="manage.deleteBtn" onclick="manageDelete()"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT MODAL -->
+<div class="overlay" id="overlay-about">
+  <div class="modal">
+    <button class="closeX" onclick="closeModal('about')">×</button>
+    <h2 data-i18n="about.title"></h2>
+    <div id="aboutBody"></div>
+  </div>
+</div>
+
+<!-- PRIVACY MODAL -->
+<div class="overlay" id="overlay-privacy">
+  <div class="modal">
+    <button class="closeX" onclick="closeModal('privacy')">×</button>
+    <h2 data-i18n="privacy.title"></h2>
+    <div id="privacyBody"></div>
+    <p class="legalNote" data-i18n="privacy.legalNote"></p>
+  </div>
+</div>
+
+<!-- IMPRESSUM MODAL -->
+<div class="overlay" id="overlay-impressum">
+  <div class="modal">
+    <button class="closeX" onclick="closeModal('impressum')">×</button>
+    <h2 data-i18n="impressum.title"></h2>
+    <p data-i18n="impressum.note"></p>
+    <div class="impressumRow"><span class="k" data-i18n="impressum.nameLabel"></span><span id="ownerName"></span></div>
+    <div class="impressumRow"><span class="k" data-i18n="impressum.addressLabel"></span><span id="ownerAddress"></span></div>
+    <div class="impressumRow"><span class="k" data-i18n="impressum.contactLabel"></span><span id="ownerEmail"></span></div>
+    <p class="legalNote" data-i18n="impressum.lawNote"></p>
+  </div>
+</div>
+
+<!-- ffmpeg.wasm — загружаем асинхронно, не блокируем страницу -->
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+<script>
+(function(){
+'use strict';
+
+// ── Данные владельца (статически вшиты, т.к. нет серверного шаблонизатора) ──
+var OWNER = {
+  name:    'Vlada Ivanova (Иванова Влада)',
+  street:  'Wartenburgstraße 18',
+  zipCity: '__ЗАПОЛНИТЕ: ИНДЕКС И ГОРОД__',
+  country: 'Deutschland',
+  email:   'slavasolen@gmail.com'
+};
+
+// ── I18N ──────────────────────────────────────────────────────────────────────
+var LANGS=[{code:'ru',label:'RU'},{code:'en',label:'EN'},{code:'de',label:'DE'},
+  {code:'es',label:'ES'},{code:'fr',label:'FR'},{code:'zh',label:'ZH'},
+  {code:'ar',label:'AR'},{code:'hi',label:'HI'},{code:'pt',label:'PT'}];
+var RTL_LANGS=['ar'];
+
+// Полный объект I18N с обновлёнными текстами Datenschutz
+// (упоминания "диска" заменены на "бакет Supabase (регион Франкфурт)")
+var I18N={
+ru:{
+  nav:{about:'О проекте',privacy:'Конфиденциальность',impressum:'Выходные данные',manage:'У меня есть токен'},
+  intro:'Архив дыхания людей со всего мира. Каждая запись — короткий цикл вдоха и выдоха, анонимный. У автора каждой записи всегда есть способ удалить её — без объяснений и без вопросов.',
+  recordBtn:'Записать дыхание',
+  meta:{active:'Записей сейчас:',deleted:'Удалено и оставило след:'},
+  emptyNote:'Архив пока пуст. Будьте первым — каждая запись оставляет в нём форму, даже если потом вы решите её убрать.',
+  footerLocation:'Берлин · международный проект · 2026',
+  processing:{hint:'Обработка аудио в браузере…'},
+  consent:{title:'Прежде чем начать',text:'Вы запишете короткий цикл дыхания (вдох-выдох), от 1 до 20 секунд. Запись анонимна — мы не просим имя, email или другие данные. После записи вы получите токен — единственный способ опубликовать или удалить эту запись позже. Мы не храним токен в открытом виде и не сможем восстановить его, если вы его потеряете.',checkbox:'Я понимаю, что запись будет обрабатываться автоматически (нормализация громкости, шумоподавление) и пройдёт техническую проверку перед публикацией.',continueBtn:'Продолжить',cancelBtn:'Отмена'},
+  record:{title:'Запись',hint:'Поднесите телефон ближе ко рту или горлу. Тихая комната — лучший вариант.',startBtn:'Начать запись',stopBtn:'Остановить',hintStart:'нажмите, чтобы начать',hintMax:'макс. 20s'},
+  preview:{title:'Прослушать',durationLabel:'Длительность:',uploadBtn:'Загрузить и получить токен',rerecordBtn:'Перезаписать'},
+  token:{title:'Сохраните токен',warning:'Это единственный способ опубликовать или удалить запись. Мы храним только его отпечаток — без токена мы тоже не сможем её найти.',copyBtn:'Скопировать',copied:'скопировано',pendingNote:'Похоже на речь — перед публикацией запись посмотрит модератор. Токен уже работает для удаления.',publishNowBtn:'Опубликовать сейчас',closeBtn:'Оставить черновиком, закрыть'},
+  manage:{title:'Управление записью',text:'Вставьте токен, который вы получили при записи.',placeholder:'токен',checkBtn:'Проверить',publishBtn:'Опубликовать',deleteBtn:'Удалить навсегда',confirmDelete:'Удалить запись навсегда? Это нельзя отменить.',notFound:'Токен не найден.',networkError:'Сетевая ошибка.'},
+  status:{draft:'черновик (не опубликовано)',pending_review:'на проверке у модератора',active:'опубликовано',deleted:'удалено',rejected:'отклонено'},
+  timeOfDay:{lateNight:'глубокой ночью',dawn:'на рассвете',morning:'утром',midday:'днём',sunset:'на закате',evening:'вечером'},
+  errors:{rate_limited:'Слишком много записей с этого адреса за последний час. Попробуйте позже.',too_large:'Файл слишком большой.',empty:'Пустая запись.',decode_failed:'Не удалось распознать аудиоформат.',too_short:'Запись короче 0.6 секунд — слишком коротко для одного цикла дыхания.',too_long:'Запись длиннее 20 секунд — нужен один короткий цикл вдоха-выдоха.',silent:'Похоже, запись пустая или слишком тихая. Поднесите телефон ближе и попробуйте снова в тихом помещении.',processing_failed:'Не получилось обработать запись. Попробуйте ещё раз.',not_found:'Токен не найден.',deleted:'Эта запись уже удалена.',rejected:'Эта запись была отклонена модератором.',pending_review:'Запись ещё проверяется модератором.',missing_token:'Не указан токен.',invalid_json:'Некорректный запрос.',bad_request:'Некорректный запрос.',published:'Опубликовано.',reported:'Спасибо. Запись скрыта из архива до проверки модератором.',networkError:'Сетевая ошибка, попробуйте ещё раз.'},
+  about:{title:'О проекте',body:['«Дыхание» — архив присутствия и согласия. Тема проекта — пережитое гендерное насилие и то, что происходит после: присутствие, согласие, возможность его отозвать, право решать, когда и как тебя слышат.','Дыхание выбрано вместо изображения лица или голоса: оно сводит свидетельство к самому нередуцируемому физиологическому факту — ты жив, ты дышишь — не превращая чей-то опыт в зрелище.','Каждая запись токенизирована. Автор в любой момент может удалить её без объяснений. Удаление не стирает след: место в архиве остаётся, помеченное как «удалено» — это не пустота, а форма отсутствия.']},
+  privacy:{title:'Datenschutzerklärung (Политика конфиденциальности)',legalNote:'Это описание реальной механики сервиса, написанное в соответствии с DSGVO/GDPR. При коммерческом использовании или существенных изменениях рекомендуется юридическая проверка.',body:[
+    {h:'Ответственный за обработку данных',p:'__OWNER__'},
+    {h:'Какие данные мы обрабатываем',p:'Аудиозапись вашего дыхания (1–20 секунд). Обработка аудио (нормализация loudnorm, шумоподавление, конвертация в .ogg/Opus) выполняется полностью в вашем браузере с помощью ffmpeg.wasm — необработанный файл никогда не покидает ваше устройство. На сервер и в хранилище попадает только итоговый, обработанный .ogg-файл, который сохраняется в бакете Supabase Storage (регион: Франкфурт, ЕС). Мы также вычисляем нейтральную метку времени суток (например, «на рассвете») из часа на вашем устройстве и сразу отбрасываем точный час. IP-адрес временно используется только для защиты от злоупотреблений — он хранится исключительно в памяти функции и автоматически забывается.'},
+    {h:'Cookies и локальное хранилище',p:'Сайт не использует файлы cookie. Выбор языка интерфейса сохраняется в localStorage вашего браузера — эта информация остаётся на вашем устройстве и никогда не передаётся на сервер.'},
+    {h:'Токен',p:'Это единственная связь между вами и записью. Сервер хранит только необратимый криптографический отпечаток (SHA-256 хэш) токена. Если вы потеряете токен, удалить запись не сможет никто — это сознательное архитектурное решение.'},
+    {h:'Цель и правовое основание обработки',p:'Обработка осуществляется на основании вашего явного согласия при записи (ст. 6 ч. 1 (a) GDPR) и законного интереса в защите архива от злоупотреблений (ст. 6 ч. 1 (f) GDPR).'},
+    {h:'Срок хранения',p:'Опубликованная запись хранится до тех пор, пока вы не удалите её с помощью токена, либо пока проект не будет закрыт. При удалении аудиофайл безвозвратно удаляется из бакета Supabase (регион Франкфурт); в архиве остаётся только нейтральная пометка «удалено» и длительность.'},
+    {h:'Получатели данных',p:'Данные не передаются третьим лицам, за исключением хостинг-провайдеров: Netlify (фронтенд и серверлесс-функции) и Supabase (база данных и хранилище файлов, регион Франкфурт, ЕС). Оба провайдера работают в рамках GDPR.'},
+    {h:'Ваши права',p:'Вы вправе запросить доступ к своим данным, их исправление, удаление, ограничение обработки, а также отозвать согласие в любой момент. Удалить запись можно самостоятельно в разделе «У меня есть токен». Вы также имеете право подать жалобу в надзорный орган (в Берлине — Berliner Beauftragte für Datenschutz und Informationsfreiheit).'},
+    {h:'Безопасность',p:'Соединение с сайтом защищено по протоколу HTTPS/TLS. Доступ к панели модерации защищён паролем.'}
+  ]},
+  impressum:{title:'Impressum (Выходные данные)',note:'Согласно §5 Закона о телемедиа (TMG):',nameLabel:'Имя:',addressLabel:'Адрес:',contactLabel:'Email:',phoneLabel:'Телефон:',lawNote:'Это некоммерческий частный проект. Ответственный за содержание согласно §18 абз. 2 MStV — указанное выше физическое лицо. Фронтенд размещён на Netlify, база данных и аудиофайлы хранятся на Supabase (Франкфурт, ЕС).'}
+},
+en:{
+  nav:{about:'About',privacy:'Privacy',impressum:'Legal notice',manage:'I have a token'},
+  intro:'An archive of breath, contributed by people around the world. Each entry is one short, anonymous breath cycle. Whoever made it can always delete it — no explanation needed, no questions asked.',
+  recordBtn:'Record a breath',
+  meta:{active:'Entries now:',deleted:'Deleted, left a trace:'},
+  emptyNote:'The archive is still empty. Be the first — every entry leaves a shape in it, even if you later choose to remove it.',
+  footerLocation:'Berlin · international project · 2026',
+  processing:{hint:'Processing audio in your browser…'},
+  consent:{title:'Before you begin',text:'You will record one short breath cycle (inhale–exhale), 1 to 20 seconds long. The recording is anonymous — we don\'t ask for your name, email, or any other data. After recording you\'ll receive a token, the only way to publish or delete this entry later. We never store the token itself, only its irreversible fingerprint.',checkbox:'I understand the recording will be processed automatically (loudness normalization, noise reduction) and reviewed technically before publication.',continueBtn:'Continue',cancelBtn:'Cancel'},
+  record:{title:'Recording',hint:'Hold the phone close to your mouth or throat. A quiet room works best.',startBtn:'Start recording',stopBtn:'Stop',hintStart:'tap to start',hintMax:'max 20s'},
+  preview:{title:'Listen back',durationLabel:'Duration:',uploadBtn:'Upload and get a token',rerecordBtn:'Record again'},
+  token:{title:'Save your token',warning:'This is the only way to publish or delete this entry. We only keep its fingerprint — without the token, we cannot find it either.',copyBtn:'Copy',copied:'copied',pendingNote:'This sounds like speech, so a moderator will review it before it\'s published. The token already works for deletion.',publishNowBtn:'Publish now',closeBtn:'Keep as draft, close'},
+  manage:{title:'Manage an entry',text:'Paste the token you received when recording.',placeholder:'token',checkBtn:'Check',publishBtn:'Publish',deleteBtn:'Delete permanently',confirmDelete:'Delete this entry permanently? This cannot be undone.',notFound:'Token not found.',networkError:'Network error.'},
+  status:{draft:'draft (not published)',pending_review:'awaiting moderator review',active:'published',deleted:'deleted',rejected:'rejected'},
+  timeOfDay:{lateNight:'late at night',dawn:'at dawn',morning:'in the morning',midday:'in the afternoon',sunset:'at sunset',evening:'in the evening'},
+  errors:{rate_limited:'Too many recordings from this address in the last hour. Please try again later.',too_large:'The file is too large.',empty:'Empty recording.',decode_failed:'Could not recognize the audio format.',too_short:'The recording is shorter than 0.6 seconds — too short for one breath cycle.',too_long:'The recording is longer than 20 seconds.',silent:'The recording seems empty or too quiet.',processing_failed:'Could not process the recording. Please try again.',not_found:'Token not found.',deleted:'This entry has already been deleted.',rejected:'This entry was rejected by a moderator.',pending_review:'This entry is still under moderator review.',missing_token:'No token provided.',invalid_json:'Invalid request.',bad_request:'Invalid request.',published:'Published.',reported:'Thank you. The entry is hidden until a moderator reviews it.',networkError:'Network error, please try again.'},
+  about:{title:'About this project',body:['"Breath" is an archive of presence and consent. Its subject is gender-based violence and what comes after: presence, consent, the ability to withdraw it, and the right to decide when and how you are heard.','Breath was chosen instead of a face or a voice: it reduces testimony to the most irreducible physiological fact — you are alive, you breathe — without turning anyone\'s experience into spectacle.','Every entry is tied to a token. Its author can delete it at any time, without explanation. Deletion doesn\'t erase the trace entirely: the slot remains in the archive, marked "deleted" — not an absence, but a shape of absence.']},
+  privacy:{title:'Privacy Policy (Datenschutzerklärung)',legalNote:'This describes the actual mechanics of the service, written to align with the GDPR.',body:[
+    {h:'Data controller',p:'__OWNER__'},
+    {h:'What data we process',p:'An audio recording of your breath (1–20 seconds). Audio processing (loudnorm normalization, noise reduction, conversion to .ogg/Opus) is performed entirely in your browser using ffmpeg.wasm — the raw file never leaves your device. Only the final, processed .ogg file is sent to the server and stored in the Supabase Storage bucket (region: Frankfurt, EU).'},
+    {h:'Cookies and local storage',p:'This site does not use cookies. Your language choice is saved in your browser\'s localStorage — that information stays on your device.'},
+    {h:'Token',p:'The token is the only link between you and your entry. The server stores only an irreversible cryptographic fingerprint (SHA-256 hash), never the token itself.'},
+    {h:'Purpose and legal basis',p:'Processing is based on your explicit consent (Art. 6(1)(a) GDPR) and on legitimate interest in protecting the archive from abuse (Art. 6(1)(f) GDPR).'},
+    {h:'Retention period',p:'A published entry is kept until you delete it using your token, or until the project is shut down. On deletion, the audio file is permanently removed from the Supabase bucket (Frankfurt); only a neutral "deleted" marker and the duration remain.'},
+    {h:'Recipients',p:'Data is not shared with third parties, except Netlify (frontend and serverless functions) and Supabase (database and file storage, Frankfurt, EU). Both operate under GDPR.'},
+    {h:'Your rights',p:'You may request access, correction, deletion, and restriction of processing, and withdraw consent at any time. You can delete your entry yourself under "I have a token". You also have the right to lodge a complaint with a supervisory authority (in Berlin: Berliner Beauftragte für Datenschutz und Informationsfreiheit).'},
+    {h:'Security',p:'The connection to this site is protected via HTTPS/TLS. Access to the moderation panel is password-protected.'}
+  ]},
+  impressum:{title:'Legal Notice (Impressum)',note:'Pursuant to §5 of the German Telemedia Act (TMG):',nameLabel:'Name:',addressLabel:'Address:',contactLabel:'Email:',phoneLabel:'Phone:',lawNote:'This is a non-commercial, private project. Frontend hosted on Netlify; database and audio files stored on Supabase (Frankfurt, EU).'}
+},
+de:{
+  nav:{about:'Über das Projekt',privacy:'Datenschutz',impressum:'Impressum',manage:'Ich habe ein Token'},
+  intro:'Ein Archiv des Atems von Menschen aus aller Welt. Jeder Eintrag ist ein kurzer, anonymer Atemzyklus. Wer ihn aufgenommen hat, kann ihn jederzeit löschen — ohne Begründung, ohne Rückfragen.',
+  recordBtn:'Atem aufnehmen',
+  meta:{active:'Einträge jetzt:',deleted:'Gelöscht, hat eine Spur hinterlassen:'},
+  emptyNote:'Das Archiv ist noch leer. Seien Sie die Erste oder der Erste — jeder Eintrag hinterlässt eine Form, auch wenn Sie ihn später entfernen.',
+  footerLocation:'Berlin · internationales Projekt · 2026',
+  processing:{hint:'Audio wird im Browser verarbeitet…'},
+  consent:{title:'Bevor Sie beginnen',text:'Sie nehmen einen kurzen Atemzyklus (Einatmen–Ausatmen) auf, 1 bis 20 Sekunden. Die Aufnahme ist anonym.',checkbox:'Ich verstehe, dass die Aufnahme automatisch verarbeitet wird und vor der Veröffentlichung technisch geprüft wird.',continueBtn:'Weiter',cancelBtn:'Abbrechen'},
+  record:{title:'Aufnahme',hint:'Halten Sie das Telefon nah an Mund oder Kehle.',startBtn:'Aufnahme starten',stopBtn:'Stopp',hintStart:'antippen zum Starten',hintMax:'max. 20s'},
+  preview:{title:'Anhören',durationLabel:'Dauer:',uploadBtn:'Hochladen und Token erhalten',rerecordBtn:'Erneut aufnehmen'},
+  token:{title:'Token speichern',warning:'Dies ist die einzige Möglichkeit, diesen Eintrag zu veröffentlichen oder zu löschen.',copyBtn:'Kopieren',copied:'kopiert',pendingNote:'Das klingt nach Sprache — vor der Veröffentlichung prüft eine Moderation den Eintrag.',publishNowBtn:'Jetzt veröffentlichen',closeBtn:'Als Entwurf behalten, schließen'},
+  manage:{title:'Eintrag verwalten',text:'Fügen Sie das Token ein, das Sie bei der Aufnahme erhalten haben.',placeholder:'Token',checkBtn:'Prüfen',publishBtn:'Veröffentlichen',deleteBtn:'Endgültig löschen',confirmDelete:'Eintrag endgültig löschen?',notFound:'Token nicht gefunden.',networkError:'Netzwerkfehler.'},
+  status:{draft:'Entwurf',pending_review:'wird moderiert',active:'veröffentlicht',deleted:'gelöscht',rejected:'abgelehnt'},
+  timeOfDay:{lateNight:'spät in der Nacht',dawn:'in der Morgendämmerung',morning:'am Morgen',midday:'am Nachmittag',sunset:'bei Sonnenuntergang',evening:'am Abend'},
+  errors:{rate_limited:'Zu viele Aufnahmen in der letzten Stunde.',too_large:'Die Datei ist zu groß.',empty:'Leere Aufnahme.',decode_failed:'Audioformat nicht erkannt.',too_short:'Zu kurz.',too_long:'Zu lang.',silent:'Zu leise.',processing_failed:'Verarbeitung fehlgeschlagen.',not_found:'Token nicht gefunden.',deleted:'Bereits gelöscht.',rejected:'Abgelehnt.',pending_review:'Wird noch moderiert.',missing_token:'Kein Token.',invalid_json:'Ungültige Anfrage.',bad_request:'Ungültige Anfrage.',published:'Veröffentlicht.',reported:'Danke.',networkError:'Netzwerkfehler.'},
+  about:{title:'Über das Projekt',body:['„Atem" ist ein Archiv der Präsenz und der Zustimmung. Sein Thema ist geschlechtsspezifische Gewalt und das, was danach kommt.','Atem wurde anstelle eines Gesichts oder einer Stimme gewählt.','Jeder Eintrag ist an ein Token gebunden.']},
+  privacy:{title:'Datenschutzerklärung',legalNote:'Orientiert sich an der DSGVO.',body:[
+    {h:'Verantwortlicher',p:'__OWNER__'},
+    {h:'Welche Daten wir verarbeiten',p:'Eine Audioaufnahme Ihres Atems (1–20 Sekunden). Die Audioverarbeitung (Lautstärkenormalisierung, Rauschunterdrückung, Konvertierung in .ogg/Opus) erfolgt vollständig in Ihrem Browser mittels ffmpeg.wasm — die Rohdatei verlässt Ihr Gerät nicht. Nur die fertige .ogg-Datei wird im Supabase-Storage-Bucket gespeichert (Region: Frankfurt, EU).'},
+    {h:'Speicherdauer',p:'Beim Löschen wird die Audiodatei unwiderruflich aus dem Supabase-Bucket (Frankfurt) entfernt.'},
+    {h:'Empfänger',p:'Netlify (Frontend und Serverless-Funktionen) und Supabase (Datenbank und Dateispeicher, Frankfurt, EU).'},
+    {h:'Cookies',p:'Keine Cookies. Sprachauswahl im localStorage.'},
+    {h:'Token',p:'Nur SHA-256-Hash wird gespeichert.'},
+    {h:'Rechtsgrundlage',p:'Art. 6 Abs. 1 lit. a und f DSGVO.'},
+    {h:'Ihre Rechte',p:'Auskunft, Berichtigung, Löschung, Einschränkung, Widerruf. Beschwerde: Berliner Beauftragte für Datenschutz.'},
+    {h:'Sicherheit',p:'HTTPS/TLS. Moderationsbereich passwortgeschützt.'}
+  ]},
+  impressum:{title:'Impressum',note:'Angaben gemäß §5 TMG:',nameLabel:'Name:',addressLabel:'Anschrift:',contactLabel:'E-Mail:',phoneLabel:'Telefon:',lawNote:'Nicht-kommerzielles Projekt. Frontend: Netlify; Daten: Supabase (Frankfurt, EU).'}
+},
+es:{nav:{about:'Acerca del proyecto',privacy:'Privacidad',impressum:'Aviso legal',manage:'Tengo un token'},intro:'Un archivo de respiración de personas de todo el mundo.',recordBtn:'Grabar una respiración',meta:{active:'Entradas ahora:',deleted:'Eliminadas, dejaron rastro:'},emptyNote:'El archivo aún está vacío.',footerLocation:'Berlín · proyecto internacional · 2026',processing:{hint:'Procesando audio en el navegador…'},consent:{title:'Antes de empezar',text:'Grabarás un ciclo corto de respiración, de 1 a 20 segundos. Anónimo.',checkbox:'Entiendo que la grabación se procesará automáticamente.',continueBtn:'Continuar',cancelBtn:'Cancelar'},record:{title:'Grabación',hint:'Acerca el teléfono a tu boca.',startBtn:'Iniciar grabación',stopBtn:'Detener',hintStart:'toca para empezar',hintMax:'máx. 20s'},preview:{title:'Escuchar',durationLabel:'Duración:',uploadBtn:'Subir y obtener token',rerecordBtn:'Grabar de nuevo'},token:{title:'Guarda tu token',warning:'La única forma de publicar o eliminar esta entrada.',copyBtn:'Copiar',copied:'copiado',pendingNote:'Suena a voz — un moderador lo revisará.',publishNowBtn:'Publicar ahora',closeBtn:'Dejar como borrador'},manage:{title:'Gestionar una entrada',text:'Pega el token.',placeholder:'token',checkBtn:'Comprobar',publishBtn:'Publicar',deleteBtn:'Eliminar definitivamente',confirmDelete:'¿Eliminar definitivamente?',notFound:'Token no encontrado.',networkError:'Error de red.'},status:{draft:'borrador',pending_review:'en revisión',active:'publicado',deleted:'eliminado',rejected:'rechazado'},timeOfDay:{lateNight:'de madrugada',dawn:'al amanecer',morning:'por la mañana',midday:'por la tarde',sunset:'al atardecer',evening:'por la noche'},errors:{rate_limited:'Demasiadas grabaciones.',too_large:'Archivo muy grande.',empty:'Grabación vacía.',decode_failed:'Formato no reconocido.',too_short:'Demasiado corta.',too_long:'Demasiado larga.',silent:'Demasiado silenciosa.',processing_failed:'Error de procesamiento.',not_found:'No encontrado.',deleted:'Ya eliminado.',rejected:'Rechazado.',pending_review:'En revisión.',missing_token:'Sin token.',invalid_json:'Solicitud inválida.',bad_request:'Solicitud inválida.',published:'Publicado.',reported:'Gracias.',networkError:'Error de red.'},about:{title:'Acerca del proyecto',body:['«Respiración» es un archivo de presencia y consentimiento.','Se eligió la respiración en lugar de un rostro o una voz.','Cada entrada está vinculada a un token.']},privacy:{title:'Política de privacidad',legalNote:'Conforme al RGPD.',body:[{h:'Responsable',p:'__OWNER__'},{h:'Datos',p:'Solo el .ogg procesado se sube a Supabase Storage (Fráncfort, UE).'},{h:'Eliminación',p:'El archivo se borra del bucket de Supabase (Fráncfort).'},{h:'Destinatarios',p:'Netlify y Supabase (Fráncfort, UE).'}]},impressum:{title:'Aviso legal',note:'§5 TMG:',nameLabel:'Nombre:',addressLabel:'Dirección:',contactLabel:'Correo:',phoneLabel:'Teléfono:',lawNote:'Proyecto privado. Netlify + Supabase (Fráncfort, UE).'}},
+fr:{nav:{about:'À propos',privacy:'Confidentialité',impressum:'Mentions légales',manage:"J'ai un jeton"},intro:"Une archive du souffle de personnes du monde entier.",recordBtn:'Enregistrer un souffle',meta:{active:'Entrées actuelles :',deleted:'Supprimées, ont laissé une trace :'},emptyNote:"L'archive est encore vide.",footerLocation:'Berlin · projet international · 2026',processing:{hint:'Traitement audio dans le navigateur…'},consent:{title:'Avant de commencer',text:"Vous allez enregistrer un court cycle de souffle, de 1 à 20 secondes. Anonyme.",checkbox:"Je comprends que l'enregistrement sera traité automatiquement.",continueBtn:'Continuer',cancelBtn:'Annuler'},record:{title:'Enregistrement',hint:'Rapprochez le téléphone de votre bouche.',startBtn:"Démarrer l'enregistrement",stopBtn:'Arrêter',hintStart:'touchez pour commencer',hintMax:'max 20s'},preview:{title:'Écouter',durationLabel:'Durée :',uploadBtn:'Envoyer et obtenir un jeton',rerecordBtn:'Réenregistrer'},token:{title:'Enregistrez votre jeton',warning:"Le seul moyen de publier ou supprimer cette entrée.",copyBtn:'Copier',copied:'copié',pendingNote:"Cela ressemble à de la parole — un modérateur l'examinera.",publishNowBtn:'Publier maintenant',closeBtn:'Garder en brouillon'},manage:{title:'Gérer une entrée',text:"Collez le jeton reçu.",placeholder:'jeton',checkBtn:'Vérifier',publishBtn:'Publier',deleteBtn:'Supprimer définitivement',confirmDelete:'Supprimer définitivement ?',notFound:'Jeton introuvable.',networkError:'Erreur réseau.'},status:{draft:'brouillon',pending_review:'en modération',active:'publié',deleted:'supprimé',rejected:'rejeté'},timeOfDay:{lateNight:'tard dans la nuit',dawn:"à l'aube",morning:'le matin',midday:"l'après-midi",sunset:'au coucher du soleil',evening:'le soir'},errors:{rate_limited:'Trop d\'enregistrements.',too_large:'Fichier trop volumineux.',empty:'Vide.',decode_failed:'Format non reconnu.',too_short:'Trop court.',too_long:'Trop long.',silent:'Trop silencieux.',processing_failed:'Échec du traitement.',not_found:'Introuvable.',deleted:'Déjà supprimé.',rejected:'Rejeté.',pending_review:'En modération.',missing_token:'Pas de jeton.',invalid_json:'Requête invalide.',bad_request:'Requête invalide.',published:'Publié.',reported:'Merci.',networkError:'Erreur réseau.'},about:{title:'À propos',body:['« Souffle » est une archive de présence et de consentement.','Le souffle a été choisi plutôt qu\'un visage ou une voix.','Chaque entrée est liée à un jeton.']},privacy:{title:'Politique de confidentialité',legalNote:'Conforme au RGPD.',body:[{h:'Responsable',p:'__OWNER__'},{h:'Données',p:'Seul le fichier .ogg traité est envoyé vers Supabase Storage (Francfort, UE).'},{h:'Suppression',p:'Le fichier audio est supprimé définitivement du bucket Supabase (Francfort).'},{h:'Destinataires',p:'Netlify et Supabase (Francfort, UE).'}]},impressum:{title:'Mentions légales',note:'§5 TMG :',nameLabel:'Nom :',addressLabel:'Adresse :',contactLabel:'E-mail :',phoneLabel:'Téléphone :',lawNote:'Projet privé. Netlify + Supabase (Francfort, UE).'}},
+zh:{nav:{about:'关于本项目',privacy:'隐私政策',impressum:'法律声明',manage:'我有令牌'},intro:'这是一个收录世界各地人们呼吸的档案库。',recordBtn:'录制呼吸',meta:{active:'当前记录数:',deleted:'已删除但留下痕迹:'},emptyNote:'档案目前还是空的。',footerLocation:'柏林 · 国际项目 · 2026',processing:{hint:'正在浏览器中处理音频…'},consent:{title:'开始之前',text:'录制1到20秒的短暂呼吸循环。匿名。',checkbox:'我理解录音会被自动处理。',continueBtn:'继续',cancelBtn:'取消'},record:{title:'录音',hint:'将手机靠近口部。',startBtn:'开始录音',stopBtn:'停止',hintStart:'点击开始',hintMax:'最长20秒'},preview:{title:'回放',durationLabel:'时长:',uploadBtn:'上传并获取令牌',rerecordBtn:'重新录制'},token:{title:'保存你的令牌',warning:'发布或删除该记录的唯一方式。',copyBtn:'复制',copied:'已复制',pendingNote:'听起来像是说话——发布前会审核。',publishNowBtn:'立即发布',closeBtn:'保留为草稿'},manage:{title:'管理记录',text:'粘贴令牌。',placeholder:'令牌',checkBtn:'检查',publishBtn:'发布',deleteBtn:'永久删除',confirmDelete:'确定永久删除？',notFound:'未找到。',networkError:'网络错误。'},status:{draft:'草稿',pending_review:'审核中',active:'已发布',deleted:'已删除',rejected:'已拒绝'},timeOfDay:{lateNight:'深夜',dawn:'黎明',morning:'清晨',midday:'下午',sunset:'日落',evening:'傍晚'},errors:{rate_limited:'请稍后再试。',too_large:'文件过大。',empty:'空录音。',decode_failed:'格式无法识别。',too_short:'太短。',too_long:'太长。',silent:'太安静。',processing_failed:'处理失败。',not_found:'未找到。',deleted:'已删除。',rejected:'已拒绝。',pending_review:'审核中。',missing_token:'无令牌。',invalid_json:'请求无效。',bad_request:'请求无效。',published:'已发布。',reported:'谢谢。',networkError:'网络错误。'},about:{title:'关于本项目',body:['「呼吸」是一个关于在场与同意的档案库。','之所以选择呼吸而非面孔或声音。','每一条记录都与一个令牌绑定。']},privacy:{title:'隐私政策',legalNote:'符合GDPR。',body:[{h:'数据控制者',p:'__OWNER__'},{h:'数据处理',p:'仅处理后的.ogg文件上传至Supabase Storage（法兰克福，欧盟）。'},{h:'删除',p:'音频文件从Supabase存储桶（法兰克福）永久删除。'},{h:'接收方',p:'Netlify和Supabase（法兰克福，欧盟）。'}]},impressum:{title:'法律声明',note:'§5 TMG:',nameLabel:'姓名:',addressLabel:'地址:',contactLabel:'邮箱:',phoneLabel:'电话:',lawNote:'非商业项目。Netlify + Supabase（法兰克福，欧盟）。'}},
+ar:{nav:{about:'حول المشروع',privacy:'الخصوصية',impressum:'بيانات الناشر',manage:'لدي رمز'},intro:'أرشيف لأنفاس أشخاص من جميع أنحاء العالم.',recordBtn:'سجّل نفسًا',meta:{active:'عدد التسجيلات الآن:',deleted:'محذوفة وتركت أثرًا:'},emptyNote:'الأرشيف ما زال فارغًا.',footerLocation:'برلين · مشروع دولي · 2026',processing:{hint:'معالجة الصوت في المتصفح…'},consent:{title:'قبل أن تبدأ',text:'تسجيل دورة تنفس قصيرة من 1 إلى 20 ثانية. مجهول الهوية.',checkbox:'أفهم أن التسجيل سيُعالج تلقائيًا.',continueBtn:'متابعة',cancelBtn:'إلغاء'},record:{title:'تسجيل',hint:'قرّب الهاتف من فمك.',startBtn:'بدء التسجيل',stopBtn:'إيقاف',hintStart:'اضغط للبدء',hintMax:'الحد الأقصى 20 ثانية'},preview:{title:'استمع',durationLabel:'المدة:',uploadBtn:'رفع والحصول على رمز',rerecordBtn:'إعادة التسجيل'},token:{title:'احفظ رمزك',warning:'الوسيلة الوحيدة للنشر أو الحذف.',copyBtn:'نسخ',copied:'تم النسخ',pendingNote:'يبدو كلامًا — سيراجعه مشرف.',publishNowBtn:'انشر الآن',closeBtn:'الاحتفاظ كمسودة'},manage:{title:'إدارة تسجيل',text:'الصق الرمز.',placeholder:'الرمز',checkBtn:'تحقّق',publishBtn:'نشر',deleteBtn:'حذف نهائي',confirmDelete:'حذف نهائيًا؟',notFound:'غير موجود.',networkError:'خطأ في الشبكة.'},status:{draft:'مسودة',pending_review:'قيد المراجعة',active:'منشور',deleted:'محذوف',rejected:'مرفوض'},timeOfDay:{lateNight:'في عمق الليل',dawn:'عند الفجر',morning:'في الصباح',midday:'بعد الظهر',sunset:'عند الغروب',evening:'في المساء'},errors:{rate_limited:'حاول لاحقًا.',too_large:'الملف كبير.',empty:'فارغ.',decode_failed:'تنسيق غير معروف.',too_short:'قصير جدًا.',too_long:'طويل جدًا.',silent:'هادئ جدًا.',processing_failed:'فشل المعالجة.',not_found:'غير موجود.',deleted:'محذوف.',rejected:'مرفوض.',pending_review:'قيد المراجعة.',missing_token:'لا رمز.',invalid_json:'طلب غير صالح.',bad_request:'طلب غير صالح.',published:'تم النشر.',reported:'شكرًا.',networkError:'خطأ في الشبكة.'},about:{title:'حول المشروع',body:['"النَفَس" أرشيف للحضور والموافقة.','اختير النَفَس بدلًا من الوجه أو الصوت.','كل تسجيل مرتبط برمز.']},privacy:{title:'سياسة الخصوصية',legalNote:'متوافق مع GDPR.',body:[{h:'المسؤول',p:'__OWNER__'},{h:'البيانات',p:'فقط ملف .ogg المعالج يُرفع إلى Supabase Storage (فرانكفورت، الاتحاد الأوروبي).'},{h:'الحذف',p:'يُحذف الملف من Supabase (فرانكفورت).'},{h:'المستلمون',p:'Netlify وSupabase (فرانكفورت، الاتحاد الأوروبي).'}]},impressum:{title:'بيانات الناشر',note:'§5 TMG:',nameLabel:'الاسم:',addressLabel:'العنوان:',contactLabel:'البريد:',phoneLabel:'الهاتف:',lawNote:'مشروع خاص. Netlify + Supabase (فرانكفورت).'}},
+hi:{nav:{about:'परियोजना के बारे में',privacy:'गोपनीयता',impressum:'कानूनी सूचना',manage:'मेरे पास टोकन है'},intro:'दुनिया भर के लोगों की सांस का एक संग्रह।',recordBtn:'सांस रिकॉर्ड करें',meta:{active:'अभी प्रविष्टियाँ:',deleted:'हटाई गईं, निशान छोड़ गईं:'},emptyNote:'संग्रह अभी खाली है।',footerLocation:'बर्लिन · अंतरराष्ट्रीय परियोजना · 2026',processing:{hint:'ब्राउज़र में ऑडियो प्रोसेस हो रहा है…'},consent:{title:'शुरू करने से पहले',text:'1 से 20 सेकंड का गुमनाम श्वास-चक्र रिकॉर्ड करें।',checkbox:'मैं समझता/समझती हूँ।',continueBtn:'जारी रखें',cancelBtn:'रद्द करें'},record:{title:'रिकॉर्डिंग',hint:'फ़ोन मुँह के पास रखें।',startBtn:'रिकॉर्डिंग शुरू करें',stopBtn:'रोकें',hintStart:'टैप करें',hintMax:'अधिकतम 20 सेकंड'},preview:{title:'सुनें',durationLabel:'अवधि:',uploadBtn:'अपलोड करें',rerecordBtn:'फिर से रिकॉर्ड करें'},token:{title:'टोकन सहेजें',warning:'प्रकाशित या हटाने का एकमात्र तरीका।',copyBtn:'कॉपी करें',copied:'कॉपी हो गया',pendingNote:'मॉडरेटर समीक्षा करेगा।',publishNowBtn:'अभी प्रकाशित करें',closeBtn:'ड्राफ़्ट रखें'},manage:{title:'प्रविष्टि प्रबंधित करें',text:'टोकन चिपकाएँ।',placeholder:'टोकन',checkBtn:'जाँचें',publishBtn:'प्रकाशित करें',deleteBtn:'स्थायी रूप से हटाएँ',confirmDelete:'स्थायी रूप से हटाना है?',notFound:'टोकन नहीं मिला।',networkError:'नेटवर्क त्रुटि।'},status:{draft:'ड्राफ़्ट',pending_review:'समीक्षाधीन',active:'प्रकाशित',deleted:'हटाया गया',rejected:'अस्वीकृत'},timeOfDay:{lateNight:'गहरी रात',dawn:'भोर',morning:'सुबह',midday:'दोपहर',sunset:'सूर्यास्त',evening:'शाम'},errors:{rate_limited:'बाद में प्रयास करें।',too_large:'फ़ाइल बड़ी है।',empty:'खाली।',decode_failed:'फ़ॉर्मेट अज्ञात।',too_short:'बहुत छोटा।',too_long:'बहुत लंबा।',silent:'बहुत शांत।',processing_failed:'प्रसंस्करण विफल।',not_found:'नहीं मिला।',deleted:'हटा दिया।',rejected:'अस्वीकृत।',pending_review:'समीक्षाधीन।',missing_token:'टोकन नहीं।',invalid_json:'अमान्य।',bad_request:'अमान्य।',published:'प्रकाशित।',reported:'धन्यवाद।',networkError:'नेटवर्क त्रुटि।'},about:{title:'परियोजना के बारे में',body:['«सांस» उपस्थिति और सहमति का एक संग्रह है।','सांस को चेहरे या आवाज़ के बजाय चुना गया।','हर प्रविष्टि एक टोकन से जुड़ी होती है।']},privacy:{title:'गोपनीयता नीति',legalNote:'GDPR के अनुरूप।',body:[{h:'डेटा नियंत्रक',p:'__OWNER__'},{h:'डेटा',p:'केवल प्रसंस्कृत .ogg फ़ाइल Supabase Storage (फ्रैंकफर्ट, EU) में अपलोड होती है।'},{h:'हटाने पर',p:'Supabase बकेट से फ़ाइल स्थायी रूप से हटा दी जाती है।'},{h:'प्राप्तकर्ता',p:'Netlify और Supabase (फ्रैंकफर्ट, EU).'}]},impressum:{title:'कानूनी सूचना',note:'§5 TMG:',nameLabel:'नाम:',addressLabel:'पता:',contactLabel:'ईमेल:',phoneLabel:'फ़ोन:',lawNote:'गैर-व्यावसायिक परियोजना। Netlify + Supabase (फ्रैंकफर्ट, EU).'}},
+pt:{nav:{about:'Sobre o projeto',privacy:'Privacidade',impressum:'Aviso legal',manage:'Tenho um token'},intro:'Um arquivo da respiração de pessoas de todo o mundo.',recordBtn:'Gravar uma respiração',meta:{active:'Entradas agora:',deleted:'Apagadas, deixaram um rastro:'},emptyNote:'O arquivo ainda está vazio.',footerLocation:'Berlim · projeto internacional · 2026',processing:{hint:'Processando áudio no navegador…'},consent:{title:'Antes de começar',text:'Grave um breve ciclo de respiração de 1 a 20 segundos. Anônimo.',checkbox:'Entendo que a gravação será processada automaticamente.',continueBtn:'Continuar',cancelBtn:'Cancelar'},record:{title:'Gravação',hint:'Aproxime o telefone da boca.',startBtn:'Iniciar gravação',stopBtn:'Parar',hintStart:'toque para começar',hintMax:'máx. 20s'},preview:{title:'Ouvir',durationLabel:'Duração:',uploadBtn:'Enviar e obter um token',rerecordBtn:'Gravar novamente'},token:{title:'Salve seu token',warning:'A única forma de publicar ou apagar esta entrada.',copyBtn:'Copiar',copied:'copiado',pendingNote:'Soa como fala — um moderador vai revisar.',publishNowBtn:'Publicar agora',closeBtn:'Manter como rascunho'},manage:{title:'Gerenciar uma entrada',text:'Cole o token.',placeholder:'token',checkBtn:'Verificar',publishBtn:'Publicar',deleteBtn:'Apagar permanentemente',confirmDelete:'Apagar permanentemente?',notFound:'Token não encontrado.',networkError:'Erro de rede.'},status:{draft:'rascunho',pending_review:'em revisão',active:'publicado',deleted:'apagado',rejected:'rejeitado'},timeOfDay:{lateNight:'de madrugada',dawn:'ao amanhecer',morning:'pela manhã',midday:'à tarde',sunset:'ao entardecer',evening:'à noite'},errors:{rate_limited:'Muitas gravações. Tente mais tarde.',too_large:'Arquivo muito grande.',empty:'Gravação vazia.',decode_failed:'Formato não reconhecido.',too_short:'Muito curta.',too_long:'Muito longa.',silent:'Muito silenciosa.',processing_failed:'Erro no processamento.',not_found:'Não encontrado.',deleted:'Já apagado.',rejected:'Rejeitado.',pending_review:'Em revisão.',missing_token:'Sem token.',invalid_json:'Requisição inválida.',bad_request:'Requisição inválida.',published:'Publicado.',reported:'Obrigado.',networkError:'Erro de rede.'},about:{title:'Sobre o projeto',body:['«Respiração» é um arquivo de presença e consentimento.','A respiração foi escolhida em vez de um rosto ou uma voz.','Cada entrada está vinculada a um token.']},privacy:{title:'Política de Privacidade',legalNote:'Conforme o RGPD.',body:[{h:'Controlador',p:'__OWNER__'},{h:'Dados',p:'Apenas o arquivo .ogg processado é enviado para o Supabase Storage (Frankfurt, UE).'},{h:'Exclusão',p:'O arquivo é removido permanentemente do bucket Supabase (Frankfurt).'},{h:'Destinatários',p:'Netlify e Supabase (Frankfurt, UE).'}]},impressum:{title:'Aviso legal',note:'§5 TMG:',nameLabel:'Nome:',addressLabel:'Endereço:',contactLabel:'E-mail:',phoneLabel:'Telefone:',lawNote:'Projeto privado. Netlify + Supabase (Frankfurt, UE).'}}
+};
+
+// Подставляем владельца во все языки
+var OWNER_TEXT = OWNER.name+', '+OWNER.street+', '+OWNER.zipCity+', '+OWNER.country+' — '+OWNER.email;
+Object.keys(I18N).forEach(function(code){
+  (I18N[code].privacy.body||[]).forEach(function(s){ if(s.p==='__OWNER__') s.p=OWNER_TEXT; });
+  // Заполняем Impressum
+});
+
+// ── Язык ──────────────────────────────────────────────────────────────────────
+var currentLang=(localStorage.getItem('breathingArchiveLang'))||((navigator.language||'ru').slice(0,2));
+if(!I18N[currentLang]) currentLang='en';
+
+function t(path){
+  var parts=path.split('.'), node=I18N[currentLang];
+  for(var i=0;i<parts.length;i++) node=node&&node[parts[i]];
+  return node;
+}
+
+function renderLangButtons(){
+  var row=document.getElementById('langRow'); row.innerHTML='';
+  LANGS.forEach(function(l){
+    var b=document.createElement('button');
+    b.className='langBtn'+(l.code===currentLang?' active':'');
+    b.textContent=l.label; b.onclick=function(){setLang(l.code);};
+    row.appendChild(b);
+  });
+}
+
+function applyStaticText(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var v=t(el.getAttribute('data-i18n'));
+    if(typeof v==='string') el.textContent=v;
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+    var v=t(el.getAttribute('data-i18n-placeholder'));
+    if(typeof v==='string') el.placeholder=v;
+  });
+  // About body
+  var ab=document.getElementById('aboutBody'); ab.innerHTML='';
+  (t('about.body')||[]).forEach(function(p){var el=document.createElement('p');el.textContent=p;ab.appendChild(el);});
+  // Privacy body
+  var pb=document.getElementById('privacyBody'); pb.innerHTML='';
+  (t('privacy.body')||[]).forEach(function(sec){
+    var h=document.createElement('h3');h.textContent=sec.h;pb.appendChild(h);
+    var p=document.createElement('p');p.textContent=sec.p;pb.appendChild(p);
+  });
+  // Impressum
+  var on=document.getElementById('ownerName'); if(on) on.textContent=OWNER.name;
+  var oa=document.getElementById('ownerAddress'); if(oa) oa.textContent=OWNER.street+', '+OWNER.zipCity+', '+OWNER.country;
+  var oe=document.getElementById('ownerEmail'); if(oe) oe.textContent=OWNER.email;
+}
+
+function setLang(code){
+  currentLang=code;
+  try{localStorage.setItem('breathingArchiveLang',code);}catch(e){}
+  document.documentElement.lang=code;
+  document.body.setAttribute('dir',RTL_LANGS.indexOf(code)!==-1?'rtl':'ltr');
+  document.body.className='lang-'+code;
+  renderLangButtons();
+  applyStaticText();
+  renderGrid();
+}
+
+// ── Модалки ───────────────────────────────────────────────────────────────────
+window.openModal=function(name){
+  document.getElementById('overlay-'+name).classList.add('open');
+  if(name==='record') resetRecordModal();
+};
+window.closeModal=function(name){
+  document.getElementById('overlay-'+name).classList.remove('open');
+  if(name==='record') stopAndCleanupRecording();
+};
+document.querySelectorAll('.overlay').forEach(function(ov){
+  ov.addEventListener('click',function(e){if(e.target===ov) ov.classList.remove('open');});
+});
+
+// ── Архив-грид ────────────────────────────────────────────────────────────────
+var ARCHIVE=[];
+
+function fmtTip(s){
+  var tod=(I18N[currentLang].timeOfDay&&I18N[currentLang].timeOfDay[s.timeOfDay])||'';
+  if(s.status==='deleted') return t('status.deleted')+' · '+tod;
+  return (s.duration!=null?s.duration.toFixed(1)+'s · ':'')+tod;
+}
+
+function renderGrid(){
+  var grid=document.getElementById('grid'); grid.innerHTML='';
+  document.getElementById('emptyNote').style.display=ARCHIVE.length?'none':'block';
+  var maxDur=Math.max(1,Math.max.apply(null,ARCHIVE.filter(function(s){return s.status==='active';}).map(function(s){return s.duration||1;}).concat([1])));
+  ARCHIVE.forEach(function(s){
+    var el=document.createElement('div');
+    el.className='slot'+(s.status==='deleted'?' deleted':'');
+    el.dataset.id=s.id;
+    var bar=document.createElement('div'); bar.className='bar';
+    var h=s.status==='active'?Math.max(10,(s.duration/maxDur)*200):18;
+    bar.style.height=h+'px'; el.appendChild(bar);
+    var tip=document.createElement('div'); tip.className='tip'; tip.textContent=fmtTip(s); el.appendChild(tip);
+    if(s.status==='active'){
+      var rep=document.createElement('button');
+      rep.className='reportBtn'; rep.textContent='⚑';
+      rep.onclick=function(ev){ev.stopPropagation();reportSlot(s.id);};
+      el.appendChild(rep);
+      el.addEventListener('mousedown',function(){playSlot(s.id,el);});
+      el.addEventListener('touchstart',function(e){e.preventDefault();playSlot(s.id,el);},{passive:false});
+      el.addEventListener('mouseup',function(){stopSlot(s.id,el);});
+      el.addEventListener('mouseleave',function(){stopSlot(s.id,el);});
+      el.addEventListener('touchend',function(){stopSlot(s.id,el);});
+    }
+    grid.appendChild(el);
+  });
+  document.getElementById('metaActive').textContent=ARCHIVE.filter(function(s){return s.status==='active';}).length;
+  document.getElementById('metaDeleted').textContent=ARCHIVE.filter(function(s){return s.status==='deleted';}).length;
+}
+
+function reportSlot(id){
+  fetch('/api/report/'+id,{method:'POST'}).then(function(){loadArchive();});
+}
+
+function loadArchive(){
+  fetch('/api/archive').then(function(r){return r.json();}).then(function(data){
+    ARCHIVE=data.slots||[]; renderGrid();
+  }).catch(function(){});
+}
+
+// ── Воспроизведение ───────────────────────────────────────────────────────────
+var actx=null;
+function ctx(){if(!actx) actx=new(window.AudioContext||window.webkitAudioContext)(); return actx;}
+var activeNodes={};
+
+function playSlot(id,el,opts){
+  opts=opts||{};
+  if(activeNodes[id]) return;
+  el&&el.classList.add('playing');
+  fetch('/api/audio/'+id).then(function(r){if(!r.ok) throw 0;return r.arrayBuffer();})
+    .then(function(buf){return ctx().decodeAudioData(buf);})
+    .then(function(audioBuf){
+      var source=ctx().createBufferSource();
+      source.buffer=audioBuf; source.loop=!!opts.loop;
+      var gain=ctx().createGain(); gain.gain.value=0;
+      var pan=ctx().createStereoPanner?ctx().createStereoPanner():null;
+      if(pan) pan.pan.value=opts.pan!=null?opts.pan:0;
+      source.connect(gain);
+      if(pan){gain.connect(pan);pan.connect(ctx().destination);}else{gain.connect(ctx().destination);}
+      gain.gain.linearRampToValueAtTime(opts.volume!=null?opts.volume:1,ctx().currentTime+(opts.fadeIn||0.05));
+      source.start();
+      activeNodes[id]={source:source,gain:gain,el:el};
+      source.onended=function(){
+        if(activeNodes[id]&&activeNodes[id].source===source){delete activeNodes[id];el&&el.classList.remove('playing');}
+      };
+    }).catch(function(){el&&el.classList.remove('playing');});
+}
+
+function stopSlot(id,el,fade){
+  var n=activeNodes[id]; if(!n) return;
+  var f=fade!=null?fade:0.15;
+  try{n.gain.gain.linearRampToValueAtTime(0,ctx().currentTime+f);n.source.stop(ctx().currentTime+f+0.02);}catch(e){}
+  delete activeNodes[id]; el&&el.classList.remove('playing');
+}
+
+var ambientVoices=[],MAX_AMBIENT=5,ambientTimer=null;
+function scheduleAmbient(){
+  ambientTimer=setTimeout(function(){maybeAddAmbientVoice();scheduleAmbient();},9000+Math.random()*9000);
+}
+function maybeAddAmbientVoice(){
+  var candidates=ARCHIVE.filter(function(s){return s.status==='active'&&ambientVoices.indexOf(s.id)===-1;});
+  if(!candidates.length||ambientVoices.length>=MAX_AMBIENT) return;
+  var pick=candidates[Math.floor(Math.random()*candidates.length)];
+  ambientVoices.push(pick.id);
+  var el=document.querySelector('.slot[data-id="'+pick.id+'"]');
+  playSlot(pick.id,el,{loop:true,volume:0.16+Math.random()*0.1,pan:(Math.random()*2-1),fadeIn:2.5});
+}
+function fadeOldestAmbient(){
+  if(!ambientVoices.length) return;
+  var id=ambientVoices.shift(); var n=activeNodes[id];
+  if(n) stopSlot(id,n.el,2.5);
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden) ambientVoices.slice().forEach(function(){fadeOldestAmbient();});
+});
+
+// ── ffmpeg.wasm ───────────────────────────────────────────────────────────────
+var ffmpegReady=false, ffmpegInstance=null;
+
+async function initFfmpeg(){
+  if(ffmpegReady) return ffmpegInstance;
+  const {FFmpeg}=FFmpegWASM; // из unpkg CDN
+  ffmpegInstance=new FFmpeg();
+  await ffmpegInstance.load({
+    coreURL:'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
+  });
+  ffmpegReady=true;
+  return ffmpegInstance;
+}
+
+// Вычисляет envelope из Float32Array PCM
+function computeEnvelope(f32,numPoints){
+  numPoints=numPoints||40;
+  var n=f32.length;
+  if(n===0) return new Array(numPoints).fill(0);
+  var ws=Math.max(1,Math.floor(n/numPoints)), pts=[], peak=0.0001;
+  for(var p=0;p<numPoints;p++){
+    var start=p*ws, end=Math.min(n,start+ws), sq=0, cnt=0;
+    for(var i=start;i<end;i++){sq+=f32[i]*f32[i];cnt++;}
+    var rms=cnt>0?Math.sqrt(sq/cnt):0; pts.push(rms); if(rms>peak) peak=rms;
+  }
+  return pts.map(function(v){return Math.min(1,v/peak);});
+}
+
+// Простая эвристика похожести на речь (по автокорреляции)
+function detectSpeechLike(f32,sampleRate){
+  var frameSize=Math.floor(sampleRate*0.03);
+  var minLag=Math.floor(sampleRate/400), maxLag=Math.floor(sampleRate/80);
+  var n=f32.length, sumSq=0;
+  for(var i=0;i<n;i++) sumSq+=f32[i]*f32[i];
+  var overallRms=Math.sqrt(sumSq/Math.max(1,n));
+  if(overallRms<0.0015) return false;
+  var voiced=0, considered=0;
+  for(var start=0;start+frameSize<=n;start+=frameSize){
+    var fe=0; for(var j=start;j<start+frameSize;j++) fe+=f32[j]*f32[j];
+    fe=Math.sqrt(fe/frameSize); if(fe<overallRms*0.5) continue;
+    considered++;
+    var best=0, zle=0; for(var k=start;k<start+frameSize;k++) zle+=f32[k]*f32[k];
+    for(var lag=minLag;lag<=maxLag;lag++){
+      if(start+frameSize+lag>n) break;
+      var corr=0; for(var m=start;m<start+frameSize;m++) corr+=f32[m]*f32[m+lag];
+      var norm=zle>0?corr/zle:0; if(norm>best) best=norm;
+    }
+    if(best>0.62) voiced++;
+  }
+  return considered>=4&&(voiced/considered)>0.35;
+}
+
+async function processAudioWithFfmpeg(inputBlob){
+  const ff=await initFfmpeg();
+  const {fetchFile}=FFmpegWASM;
+  const inputData=await fetchFile(inputBlob);
+  await ff.writeFile('input.webm',inputData);
+
+  // Конвертация: нормализация loudnorm + libopus .ogg
+  await ff.exec([
+    '-v','error','-i','input.webm',
+    '-af','highpass=f=60,afftdn=nf=-25,loudnorm=I=-20:TP=-2:LRA=11',
+    '-ac','1','-ar','48000',
+    '-c:a','libopus','-b:a','32k',
+    '-f','ogg','output.ogg'
+  ]);
+
+  // Для анализа — PCM s16le
+  await ff.exec([
+    '-v','error','-i','input.webm',
+    '-f','s16le','-ac','1','-ar','16000','pcm.raw'
+  ]);
+
+  const oggData=await ff.readFile('output.ogg');
+  const pcmData=await ff.readFile('pcm.raw');
+
+  // Очищаем
+  await ff.deleteFile('input.webm');
+  await ff.deleteFile('output.ogg');
+  await ff.deleteFile('pcm.raw');
+
+  // Анализируем PCM
+  const samples=pcmData.length/2;
+  const f32=new Float32Array(samples);
+  const view=new DataView(pcmData.buffer);
+  for(var i=0;i<samples;i++) f32[i]=view.getInt16(i*2,true)/32768;
+
+  const duration=samples/16000;
+  const envelope=computeEnvelope(f32,40);
+  const speechLike=detectSpeechLike(f32,16000);
+
+  return{
+    oggBlob:new Blob([oggData],{type:'audio/ogg'}),
+    duration,envelope,speechLike
+  };
+}
+
+// ── Флоу записи ───────────────────────────────────────────────────────────────
+var mediaRecorder=null,recordedChunks=[],recordedBlob=null;
+var processedOgg=null,processedDuration=0,processedEnvelope=[],processedSpeechLike=false;
+var recStartTime=0,recTimerInt=null,mediaStream=null;
+var issuedToken=null,issuedSlotId=null,recording=false;
+
+window.resetRecordModal=function(){
+  document.getElementById('recordStepConsent').style.display='block';
+  ['recordStepRecord','recordStepProcessing','recordStepPreview','recordStepToken'].forEach(function(id){
+    document.getElementById(id).style.display='none';
+  });
+  document.getElementById('consentCheck').checked=false;
+  recordedBlob=null; processedOgg=null; issuedToken=null;
+  document.getElementById('uploadStatus').textContent='';
+  document.getElementById('publishStatus').textContent='';
+};
+
+window.startRecordingFlow=function(){
+  if(!document.getElementById('consentCheck').checked){alert(t('consent.checkbox'));return;}
+  document.getElementById('recordStepConsent').style.display='none';
+  document.getElementById('recordStepRecord').style.display='block';
+  // Начинаем загрузку ffmpeg в фоне
+  initFfmpeg().catch(function(){});
+};
+
+window.toggleRecording=function(){
+  if(!recording) beginRecording(); else finishRecording();
+};
+
+function beginRecording(){
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    mediaStream=stream; recordedChunks=[];
+    var mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'';
+    mediaRecorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);
+    mediaRecorder.ondataavailable=function(e){if(e.data&&e.data.size>0) recordedChunks.push(e.data);};
+    mediaRecorder.onstop=function(){
+      recordedBlob=new Blob(recordedChunks,{type:mediaRecorder.mimeType||'audio/webm'});
+      mediaStream.getTracks().forEach(function(t){t.stop();});
+      showProcessing();
+    };
+    mediaRecorder.start();
+    recording=true; recStartTime=Date.now();
+    document.getElementById('recDot').classList.add('live');
+    document.getElementById('recButton').textContent=t('record.stopBtn');
+    document.getElementById('recHint').textContent=t('record.hintMax');
+    recTimerInt=setInterval(function(){
+      var el=(Date.now()-recStartTime)/1000;
+      document.getElementById('recTime').textContent=el.toFixed(1)+'s';
+      if(el>=20) finishRecording();
+    },100);
+  }).catch(function(err){alert(t('errors.processing_failed')+': '+err.message);});
+}
+
+function finishRecording(){
+  if(!recording) return;
+  recording=false; clearInterval(recTimerInt);
+  document.getElementById('recDot').classList.remove('live');
+  document.getElementById('recButton').textContent=t('record.startBtn');
+  if(mediaRecorder&&mediaRecorder.state!=='inactive') mediaRecorder.stop();
+}
+
+function showProcessing(){
+  document.getElementById('recordStepRecord').style.display='none';
+  document.getElementById('recordStepProcessing').style.display='block';
+  document.getElementById('processingHint').textContent=t('processing.hint');
+
+  processAudioWithFfmpeg(recordedBlob).then(function(result){
+    processedOgg=result.oggBlob;
+    processedDuration=result.duration;
+    processedEnvelope=result.envelope;
+    processedSpeechLike=result.speechLike;
+    showPreview();
+  }).catch(function(err){
+    console.error('ffmpeg error',err);
+    document.getElementById('recordStepProcessing').style.display='none';
+    document.getElementById('recordStepRecord').style.display='block';
+    alert(t('errors.processing_failed'));
+  });
+}
+
+function showPreview(){
+  document.getElementById('recordStepProcessing').style.display='none';
+  document.getElementById('recordStepPreview').style.display='block';
+  var url=URL.createObjectURL(processedOgg);
+  var player=document.getElementById('previewPlayer');
+  player.src=url;
+  document.getElementById('previewDuration').textContent=processedDuration.toFixed(1)+'s';
+}
+
+window.rerecord=function(){
+  processedOgg=null; recordedBlob=null;
+  document.getElementById('recordStepPreview').style.display='none';
+  document.getElementById('recordStepRecord').style.display='block';
+  document.getElementById('recTime').textContent='0.0s';
+};
+
+window.uploadRecording=function(){
+  if(!processedOgg) return;
+  document.getElementById('uploadBtn').disabled=true;
+  document.getElementById('uploadStatus').textContent='…';
+  var hour=new Date().getHours();
+  fetch('/api/record?hour='+hour,{
+    method:'POST',
+    body:processedOgg,
+    headers:{
+      'Content-Type':'audio/ogg',
+      'X-Duration':String(processedDuration),
+      'X-Envelope':JSON.stringify(processedEnvelope),
+      'X-Speech-Like':processedSpeechLike?'1':'0'
+    }
+  })
+  .then(function(r){return r.json().then(function(d){return{status:r.status,data:d};});})
+  .then(function(res){
+    if(res.status!==201){
+      document.getElementById('uploadStatus').textContent=t('errors.'+res.data.error)||t('errors.processing_failed');
+      document.getElementById('uploadBtn').disabled=false;
+      return;
+    }
+    issuedToken=res.data.token; issuedSlotId=res.data.id;
+    document.getElementById('tokenDisplay').textContent=issuedToken;
+    document.getElementById('pendingNote').style.display=res.data.pendingReview?'block':'none';
+    document.getElementById('publishNowBtn').style.display=res.data.pendingReview?'none':'inline-block';
+    document.getElementById('recordStepPreview').style.display='none';
+    document.getElementById('recordStepToken').style.display='block';
+  }).catch(function(){
+    document.getElementById('uploadStatus').textContent=t('errors.networkError');
+    document.getElementById('uploadBtn').disabled=false;
+  });
+};
+
+window.copyToken=function(){
+  navigator.clipboard.writeText(issuedToken).then(function(){
+    var b=document.getElementById('tokenDisplay');
+    b.textContent=t('token.copied');
+    setTimeout(function(){b.textContent=issuedToken;},900);
+  });
+};
+
+window.publishNow=function(){
+  fetch('/api/publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:issuedToken})})
+    .then(function(r){return r.json();}).then(function(d){
+      document.getElementById('publishStatus').textContent=d.ok?t('errors.published'):(t('errors.'+d.error)||'');
+      if(d.ok) loadArchive();
+    });
+};
+
+function stopAndCleanupRecording(){
+  if(recording) finishRecording();
+  if(mediaStream) mediaStream.getTracks().forEach(function(t){try{t.stop();}catch(e){}});
+}
+
+// ── Управление по токену ──────────────────────────────────────────────────────
+var manageCurrentToken=null;
+window.checkToken=function(){
+  var tk=document.getElementById('manageTokenInput').value.trim(); if(!tk) return;
+  manageCurrentToken=tk;
+  document.getElementById('manageStatus').textContent='…';
+  fetch('/api/status?token='+encodeURIComponent(tk))
+    .then(function(r){return r.json().then(function(d){return{status:r.status,data:d};});})
+    .then(function(res){
+      if(res.status!==200){document.getElementById('manageStatus').textContent=t('manage.notFound');document.getElementById('manageActions').style.display='none';return;}
+      var label=(I18N[currentLang].status&&I18N[currentLang].status[res.data.status])||res.data.status;
+      document.getElementById('manageStatus').textContent=label+(res.data.duration?' · '+Number(res.data.duration).toFixed(1)+'s':'');
+      document.getElementById('manageActions').style.display=(res.data.status==='deleted'||res.data.status==='rejected')?'none':'flex';
+    }).catch(function(){document.getElementById('manageStatus').textContent=t('manage.networkError');});
+};
+window.managePublish=function(){
+  fetch('/api/publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:manageCurrentToken})})
+    .then(function(r){return r.json();}).then(function(d){checkToken();if(d.ok) loadArchive();});
+};
+window.manageDelete=function(){
+  if(!confirm(t('manage.confirmDelete'))) return;
+  fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:manageCurrentToken})})
+    .then(function(r){return r.json();}).then(function(d){checkToken();if(d.ok) loadArchive();});
+};
+
+// ── Старт ─────────────────────────────────────────────────────────────────────
+setLang(currentLang);
+loadArchive();
+setInterval(loadArchive,25000);
+scheduleAmbient();
+
+})();
+</script>
+</body>
+</html>
