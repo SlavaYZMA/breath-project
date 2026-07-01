@@ -225,8 +225,8 @@
   </div>
 </div>
 
-<!-- ffmpeg.wasm — загружаем асинхронно, не блокируем страницу -->
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+<!-- ffmpeg.wasm 0.11 — не требует SharedArrayBuffer, работает без спец. заголовков -->
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script>
 (function(){
 'use strict';
@@ -526,16 +526,19 @@ document.addEventListener('visibilitychange',function(){
   if(document.hidden) ambientVoices.slice().forEach(function(){fadeOldestAmbient();});
 });
 
-// ── ffmpeg.wasm ───────────────────────────────────────────────────────────────
+// ── ffmpeg.wasm v0.11 ─────────────────────────────────────────────────────────
+// v0.11 не требует SharedArrayBuffer и работает без специальных заголовков COOP/COEP
 var ffmpegReady=false, ffmpegInstance=null;
 
 async function initFfmpeg(){
   if(ffmpegReady) return ffmpegInstance;
-  const {FFmpeg}=FFmpegWASM; // из unpkg CDN
-  ffmpegInstance=new FFmpeg();
-  await ffmpegInstance.load({
-    coreURL:'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
+  // В v0.11 глобальный объект называется FFmpeg (не FFmpegWASM)
+  var {createFFmpeg}=FFmpeg;
+  ffmpegInstance=createFFmpeg({
+    log:false,
+    corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
   });
+  await ffmpegInstance.load();
   ffmpegReady=true;
   return ffmpegInstance;
 }
@@ -580,32 +583,34 @@ function detectSpeechLike(f32,sampleRate){
 
 async function processAudioWithFfmpeg(inputBlob){
   const ff=await initFfmpeg();
-  const {fetchFile}=FFmpegWASM;
-  const inputData=await fetchFile(inputBlob);
-  await ff.writeFile('input.webm',inputData);
+  // В v0.11 fetchFile — отдельная функция из того же модуля
+  var {fetchFile}=FFmpeg;
+
+  // Пишем входной файл в виртуальную ФС ffmpeg
+  ff.FS('writeFile','input.webm', await fetchFile(inputBlob));
 
   // Конвертация: нормализация loudnorm + libopus .ogg
-  await ff.exec([
+  await ff.run(
     '-v','error','-i','input.webm',
     '-af','highpass=f=60,afftdn=nf=-25,loudnorm=I=-20:TP=-2:LRA=11',
     '-ac','1','-ar','48000',
     '-c:a','libopus','-b:a','32k',
     '-f','ogg','output.ogg'
-  ]);
+  );
 
-  // Для анализа — PCM s16le
-  await ff.exec([
+  // Для анализа — PCM s16le mono 16kHz
+  await ff.run(
     '-v','error','-i','input.webm',
     '-f','s16le','-ac','1','-ar','16000','pcm.raw'
-  ]);
+  );
 
-  const oggData=await ff.readFile('output.ogg');
-  const pcmData=await ff.readFile('pcm.raw');
+  const oggData=ff.FS('readFile','output.ogg');
+  const pcmData=ff.FS('readFile','pcm.raw');
 
-  // Очищаем
-  await ff.deleteFile('input.webm');
-  await ff.deleteFile('output.ogg');
-  await ff.deleteFile('pcm.raw');
+  // Очищаем виртуальную ФС
+  try{ ff.FS('unlink','input.webm'); }catch(e){}
+  try{ ff.FS('unlink','output.ogg'); }catch(e){}
+  try{ ff.FS('unlink','pcm.raw'); }catch(e){}
 
   // Анализируем PCM
   const samples=pcmData.length/2;
