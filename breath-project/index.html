@@ -225,7 +225,7 @@
   </div>
 </div>
 
-<!-- ffmpeg.wasm — локальные файлы -->
+<!-- ffmpeg.wasm — загружаем асинхронно, не блокируем страницу -->
 <script src="/public/ffmpeg/ffmpeg.js"></script>
 <script>
 (function(){
@@ -526,14 +526,15 @@ document.addEventListener('visibilitychange',function(){
   if(document.hidden) ambientVoices.slice().forEach(function(){fadeOldestAmbient();});
 });
 
-// ── ffmpeg.wasm — локальные файлы, без workerURL ─────────────────────────────
+// ── ffmpeg.wasm — локальные файлы ────────────────────────────────────────────
 var ffmpegReady=false, ffmpegInstance=null;
 
 async function initFfmpeg(){
   if(ffmpegReady) return ffmpegInstance;
   const {FFmpeg}=FFmpegWASM;
   ffmpegInstance=new FFmpeg();
-  // workerURL не нужен — ffmpeg 0.12 создаёт worker сам из coreURL
+  // Включаем лог чтобы видеть прогресс в консоли
+  ffmpegInstance.on('log', function(msg){ console.log('[ffmpeg]', msg.message); });
   await ffmpegInstance.load({
     coreURL:'/public/ffmpeg/ffmpeg-core.js',
     wasmURL:'/public/ffmpeg/ffmpeg-core.wasm',
@@ -586,20 +587,23 @@ async function processAudioWithFfmpeg(inputBlob){
   const inputData=await fetchFile(inputBlob);
   await ff.writeFile('input.webm',inputData);
 
-  // Конвертация: нормализация loudnorm + libopus .ogg
+  // Конвертация в ogg/opus (без loudnorm)
+  console.log('[ffmpeg] converting to ogg...');
   await ff.exec([
     '-v','error','-i','input.webm',
-    '-af','highpass=f=60,afftdn=nf=-25,loudnorm=I=-20:TP=-2:LRA=11',
+    '-af','highpass=f=60,volume=2.0',
     '-ac','1','-ar','48000',
     '-c:a','libopus','-b:a','32k',
     '-f','ogg','output.ogg'
   ]);
+  console.log('[ffmpeg] ogg done, extracting pcm...');
 
-  // Для анализа — PCM s16le
+  // PCM s16le для анализа
   await ff.exec([
     '-v','error','-i','input.webm',
     '-f','s16le','-ac','1','-ar','16000','pcm.raw'
   ]);
+  console.log('[ffmpeg] pcm done');
 
   const oggData=await ff.readFile('output.ogg');
   const pcmData=await ff.readFile('pcm.raw');
