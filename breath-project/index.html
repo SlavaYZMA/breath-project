@@ -225,8 +225,8 @@
   </div>
 </div>
 
-<!-- ffmpeg.wasm — локальные файлы, раздаём со своего домена -->
-<script src="/ffmpeg/ffmpeg.js"></script>
+<!-- ffmpeg.wasm — локальные файлы со своего домена -->
+<script src="/public/ffmpeg/ffmpeg.js"></script>
 <script>
 (function(){
 'use strict';
@@ -526,7 +526,7 @@ document.addEventListener('visibilitychange',function(){
   if(document.hidden) ambientVoices.slice().forEach(function(){fadeOldestAmbient();});
 });
 
-// ── ffmpeg.wasm — все файлы локальные, со своего домена ──────────────────────
+// ── ffmpeg.wasm — локальные файлы ────────────────────────────────────────────
 var ffmpegReady=false, ffmpegInstance=null;
 
 async function initFfmpeg(){
@@ -534,9 +534,9 @@ async function initFfmpeg(){
   const {FFmpeg}=FFmpegWASM;
   ffmpegInstance=new FFmpeg();
   await ffmpegInstance.load({
-    coreURL:'/ffmpeg/ffmpeg-core.js',
-    wasmURL:'/ffmpeg/ffmpeg-core.wasm',
-    workerURL:'/ffmpeg/ffmpeg-core.worker.js',
+    coreURL:'/public/ffmpeg/ffmpeg-core.js',
+    wasmURL:'/public/ffmpeg/ffmpeg-core.wasm',
+    workerURL:'/public/ffmpeg/ffmpeg-core.worker.js',
   });
   ffmpegReady=true;
   return ffmpegInstance;
