@@ -225,8 +225,8 @@
   </div>
 </div>
 
-<!-- ffmpeg.wasm 0.12 через jsDelivr (не имеет CORS-ограничений unpkg) -->
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js"></script>
+<!-- ffmpeg.wasm — локальные файлы, раздаём со своего домена -->
+<script src="/ffmpeg/ffmpeg.js"></script>
 <script>
 (function(){
 'use strict';
@@ -526,18 +526,17 @@ document.addEventListener('visibilitychange',function(){
   if(document.hidden) ambientVoices.slice().forEach(function(){fadeOldestAmbient();});
 });
 
-// ── ffmpeg.wasm 0.12 (jsDelivr — без CORS-проблем unpkg) ─────────────────────
+// ── ffmpeg.wasm — все файлы локальные, со своего домена ──────────────────────
 var ffmpegReady=false, ffmpegInstance=null;
 
 async function initFfmpeg(){
   if(ffmpegReady) return ffmpegInstance;
   const {FFmpeg}=FFmpegWASM;
   ffmpegInstance=new FFmpeg();
-  // Все файлы с jsDelivr — избегаем unpkg который блокирует worker
   await ffmpegInstance.load({
-    coreURL:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
-    wasmURL:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
-    workerURL:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.worker.js',
+    coreURL:'/ffmpeg/ffmpeg-core.js',
+    wasmURL:'/ffmpeg/ffmpeg-core.wasm',
+    workerURL:'/ffmpeg/ffmpeg-core.worker.js',
   });
   ffmpegReady=true;
   return ffmpegInstance;
