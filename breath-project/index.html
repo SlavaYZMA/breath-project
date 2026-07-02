@@ -225,7 +225,7 @@
   </div>
 </div>
 
-<!-- ffmpeg.wasm — локальные файлы со своего домена -->
+<!-- ffmpeg.wasm — локальные файлы -->
 <script src="/public/ffmpeg/ffmpeg.js"></script>
 <script>
 (function(){
@@ -526,17 +526,17 @@ document.addEventListener('visibilitychange',function(){
   if(document.hidden) ambientVoices.slice().forEach(function(){fadeOldestAmbient();});
 });
 
-// ── ffmpeg.wasm — локальные файлы ────────────────────────────────────────────
+// ── ffmpeg.wasm — локальные файлы, без workerURL ─────────────────────────────
 var ffmpegReady=false, ffmpegInstance=null;
 
 async function initFfmpeg(){
   if(ffmpegReady) return ffmpegInstance;
   const {FFmpeg}=FFmpegWASM;
   ffmpegInstance=new FFmpeg();
+  // workerURL не нужен — ffmpeg 0.12 создаёт worker сам из coreURL
   await ffmpegInstance.load({
     coreURL:'/public/ffmpeg/ffmpeg-core.js',
     wasmURL:'/public/ffmpeg/ffmpeg-core.wasm',
-    workerURL:'/public/ffmpeg/ffmpeg-core.worker.js',
   });
   ffmpegReady=true;
   return ffmpegInstance;
