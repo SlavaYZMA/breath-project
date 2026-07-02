@@ -1,5 +1,15 @@
-// netlify/functions/admin-approve.js
-const { getClient, json, isAdmin } = require('./_supabase');
+'use strict';
+const crypto = require('crypto');
+const { createClient } = require('@supabase/supabase-js');
+
+function supabase() { return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } }); }
+function json(statusCode, body) { return { statusCode, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, body: JSON.stringify(body) }; }
+function isAdmin(headers) {
+  const pw = process.env.ADMIN_PASSWORD;
+  if (!pw) return false;
+  const supplied = headers['x-admin-password'] || '';
+  try { return crypto.timingSafeEqual(Buffer.from(supplied), Buffer.from(pw)); } catch { return false; }
+}
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { error: 'method_not_allowed' });
@@ -8,10 +18,8 @@ exports.handler = async (event) => {
   const id = parseInt((event.path.match(/\/(\d+)$/) || [])[1] || '', 10);
   if (!id) return json(404, { error: 'not_found' });
 
-  const supabase = getClient();
-  const { error } = await supabase.from('slots')
-    .update({ status: 'active', published_at: new Date().toISOString() }).eq('id', id);
-
+  const db = supabase();
+  const { error } = await db.from('slots').update({ status: 'active', published_at: new Date().toISOString() }).eq('id', id);
   if (error) return json(500, { error: 'internal' });
   return json(200, { ok: true });
 };
